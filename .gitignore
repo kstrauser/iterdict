@@ -1,1 +1,5 @@
 *.pyc
+IterDict.egg-info/
+build/
+dist/
+test/

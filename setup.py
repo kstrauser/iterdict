@@ -12,7 +12,7 @@ setup(
     license="BSD",
     keywords="dict lazy bigdata",
     url="http://packages.python.org/an_example_pypi_project",
-    test_suite='test_iterdict',
+    test_suite='test.test_iterdict',
     py_modules=['iterdict'],
     long_description="""\
 IterDicts are almost exactly like regular Python dicts, except that they're
