@@ -247,7 +247,7 @@ class IterDict(dict):
                 try:
                     self.__iterator = iterator.items()
                 except AttributeError:
-                    self.__iterator = iterator
+                    self.__iterator = iter(iterator)
         else:
             raise ValueError('%s is not iterable' % repr(iterator))
 
