@@ -36,6 +36,8 @@ __all__ = ['IterDict']
 
 @wraps(wraps)
 def dictmethod(wrapped):
+    """Specialization of functools.wraps that skips the __module__ attribute
+    (which dict objects don't have)"""
     from functools import WRAPPER_ASSIGNMENTS
     wr_ass = set(WRAPPER_ASSIGNMENTS)
     wr_ass.remove('__module__')
@@ -43,9 +45,12 @@ def dictmethod(wrapped):
 
 
 def findkeybeforedictmethod(func):
+    """Search for the key given in args[0] before calling the wrapped
+    function"""
     @dictmethod(func)
     def inner(self, *args, **kwargs):
-        args[0] in self
+        """Find that key first!"""
+        args[0] in self  # pylint: disable=W0104
         return func(self, *args, **kwargs)
     return inner
 
@@ -135,12 +140,12 @@ class IterDict(dict):
 
     @dictmethod(__iterkeys)
     def keys(self):
-        for key, value in self.items():
+        for key, value in self.items():  # pylint: disable=W0612
             yield key
 
     @dictmethod(__itervalues)
     def values(self):
-        for key, value in self.items():
+        for key, value in self.items():  # pylint: disable=W0612
             yield value
 
     pop = findkeybeforedictmethod(dict.pop)
@@ -184,5 +189,5 @@ class IterDict(dict):
 
     def flatten(self):
         """Update the IterDict with all keys from the iterator"""
-        for key, value in self.items():
+        for key, value in self.items():  # pylint: disable=W0612
             pass
