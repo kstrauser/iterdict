@@ -69,17 +69,17 @@ class IterDict(dict):
         self.__iterator = None
 
         try:
-            self.__iterkeys = dict.iterkeys
+            self.__iterkeys = super(IterDict, self).iterkeys
         except AttributeError:
-            self.__iterkeys = dict.keys
+            self.__iterkeys = super(IterDict, self).keys
         try:
-            self.__itervalues = dict.itervalues
+            self.__itervalues = super(IterDict, self).itervalues
         except AttributeError:
-            self.__itervalues = dict.values
+            self.__itervalues = super(IterDict, self).values
         try:
-            self.__iteritems = dict.iteritems
+            self.__iteritems = super(IterDict, self).iteritems
         except AttributeError:
-            self.__iteritems = dict.items
+            self.__iteritems = super(IterDict, self).items
         self.update(*args, **kwargs)
 
     def __processiter(self):
@@ -94,7 +94,7 @@ class IterDict(dict):
 
     @_clonedictmethod
     def __contains__(self, searchkey):
-        if dict.__contains__(self, searchkey):
+        if super(IterDict, self).__contains__(searchkey):
             return True
         for key, value in self.__processiter():  # pylint: disable=W0612
             if key == searchkey:
@@ -104,7 +104,7 @@ class IterDict(dict):
     @_clonedictmethod
     def __delitem__(self, searchkey):
         try:
-            dict.__delitem__(self, searchkey)
+            super(IterDict, self).__delitem__(searchkey)
         except KeyError:
             for key, value in self.__processiter():  # pylint: disable=W0612
                 if key == searchkey:
@@ -115,7 +115,7 @@ class IterDict(dict):
     @_clonedictmethod
     def __getitem__(self, searchkey):
         try:
-            return dict.__getitem__(self, searchkey)
+            return super(IterDict, self).__getitem__(searchkey)
         except KeyError:
             pass
         for key, value in self.__processiter():
@@ -130,20 +130,20 @@ class IterDict(dict):
         iterators may turn out to be. Imagine 1,000 copies of ('key', 'value')
         where 'key' can only be a dict key one time, not 1,000 times."""
         if self.__iterator is None:
-            return dict.__len__(self)
+            return super(IterDict, self).__len__()
         raise TypeError("objects of type 'iterdict' sometimes have no defined len()")
 
     @_clonedictmethod
     def __repr__(self):
         if self.__iterator is None:
-            return dict.__repr__(self)
-        return 'IterDict<%s, fed by %s>' % (dict.__repr__(self),
+            return super(IterDict, self).__repr__()
+        return 'IterDict<%s, fed by %s>' % (super(IterDict, self).__repr__(),
             repr(self.__iterator))
 
     @_clonedictmethod
     def __setitem__(self, key, value):
-        if not dict.__contains__(self, key):
-            dict.__setitem__(self, key, value)
+        if not super(IterDict, self).__contains__(key):
+            super(IterDict, self).__setitem__(key, value)
 
     #### Standard dict methods
 
@@ -158,7 +158,7 @@ class IterDict(dict):
 
     @_clonedictmethod
     def iterkeys(self):
-        for key in self.__iterkeys(self):
+        for key in self.__iterkeys():
             yield key
         for key, value in self.__processiter():  # pylint: disable=W0612
             yield key
@@ -171,14 +171,14 @@ class IterDict(dict):
 
     @_clonedictmethod
     def itervalues(self):
-        for value in self.__itervalues(self):
+        for value in self.__itervalues():
             yield value
         for key, value in self.__processiter():  # pylint: disable=W0612
             yield value
 
     @_clonedictmethod
     def iteritems(self):
-        for item in self.__iteritems(self):
+        for item in self.__iteritems():
             yield item
         for item in self.__processiter():
             yield item
@@ -218,11 +218,11 @@ class IterDict(dict):
     def update(self, iterator=None, **kwargs):
         if not self.__iterator is None:
             raise ValueError('The current iterator is not yet exhausted')
-        dict.update(self, **kwargs)
+        super(IterDict, self).update(**kwargs)
         if iterator is None:
             pass
         elif type(iterator) == dict:
-            dict.update(self, iterator)
+            super(IterDict, self).update(iterator)
         elif hasattr(iterator, '__iter__'):
             try:
                 self.__iterator = iterator.iteritems()
