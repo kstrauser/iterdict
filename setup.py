@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
     name="IterDict",
@@ -12,8 +12,9 @@ setup(
     license="BSD",
     keywords="dict lazy bigdata",
     url="http://packages.python.org/an_example_pypi_project",
-    test_suite='test.test_iterdict',
-    py_modules=['iterdict'],
+    test_suite='iterdict.test.test_iterdict',
+    packages=find_packages('src'),
+    package_dir = {'':'src'},
     long_description="""\
 IterDicts are almost exactly like regular Python dicts, except that they're
 only populated upon demand. This gives them most of the same advantages of
