@@ -62,7 +62,7 @@ class IterDict(dict):
 
     @_clonedictmethod
     def __init__(self, *args, **kwargs):
-        dict.__init__(self)
+        super(IterDict, self).__init__()
 
         # This tracks the passed-in iterator used to fill in keys as they're
         # requested.
