@@ -68,10 +68,6 @@ class IterDict(dict):
         # requested.
         self.__iterator = None
 
-        # This tracks keys as they've been deleted from the dict so that the
-        # iterator won't insert keys that have already been removed.
-        self.__deleted = set()
-
         try:
             self.__iterkeys = dict.iterkeys
         except AttributeError:
@@ -86,22 +82,15 @@ class IterDict(dict):
             self.__iteritems = dict.items
         self.update(*args, **kwargs)
 
-    @property
-    def __exhausted(self):
-        """Has __iterator been fully consumed?"""
-        return self.__iterator is None
-
     def __processiter(self):
         """yield all of the values in self.__iterator until it's exhausted,
         then mark it as such"""
-        if self.__exhausted:
+        if self.__iterator is None:
             raise StopIteration
         for key, value in self.__iterator:
-            if not dict.__contains__(self, key) and key not in self.__deleted:
                 self[key] = value
                 yield key, value
         self.__iterator = None
-        self.__deleted = set()
 
     @_clonedictmethod
     def __contains__(self, searchkey):
@@ -114,8 +103,6 @@ class IterDict(dict):
 
     @_clonedictmethod
     def __delitem__(self, searchkey):
-        if searchkey in self.__deleted:
-            raise KeyError(searchkey)
         try:
             dict.__delitem__(self, searchkey)
         except KeyError:
@@ -124,7 +111,6 @@ class IterDict(dict):
                     break
             else:
                 raise KeyError(searchkey)
-        self.__deleted.add(searchkey)
 
     @_clonedictmethod
     def __getitem__(self, searchkey):
@@ -143,24 +129,21 @@ class IterDict(dict):
         already been consumed. Otherwise, there's no way to tell how long those
         iterators may turn out to be. Imagine 1,000 copies of ('key', 'value')
         where 'key' can only be a dict key one time, not 1,000 times."""
-        if self.__exhausted:
+        if self.__iterator is None:
             return dict.__len__(self)
         raise TypeError("objects of type 'iterdict' sometimes have no defined len()")
 
     @_clonedictmethod
     def __repr__(self):
-        if self.__exhausted:
+        if self.__iterator is None:
             return dict.__repr__(self)
         return 'IterDict<%s, fed by %s>' % (dict.__repr__(self),
             repr(self.__iterator))
 
     @_clonedictmethod
     def __setitem__(self, key, value):
-        try:
-            self.__deleted.remove(key)
-        except KeyError:
-            pass
-        dict.__setitem__(self, key, value)
+        if not dict.__contains__(self, key):
+            dict.__setitem__(self, key, value)
 
     #### Standard dict methods
 
@@ -233,7 +216,7 @@ class IterDict(dict):
 
     @_clonedictmethod
     def update(self, iterator=None, **kwargs):
-        if not self.__exhausted:
+        if not self.__iterator is None:
             raise ValueError('The current iterator is not yet exhausted')
         dict.update(self, **kwargs)
         if iterator is None:

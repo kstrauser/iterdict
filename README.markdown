@@ -1,7 +1,7 @@
 # Haven't you always wanted an infinite dict?
 
-IterDicts are almost exactly like regular Python dicts except that they're
-only populated upon demand. This gives them most of the same advantages of
+IterDicts are similar to regular Python dicts except that they're only
+populated upon demand. This gives them most of the same advantages of
 generators, such as the ability to operator on very large (or infinite!)
 datasets.
 
@@ -19,23 +19,39 @@ it finds the key (or the universe dies of heat death):
     >>> list(d)
     [you're going to be here a while]
 
-## Deleting keys that aren't populated yet
+## Important differences
 
-IterDicts also track keys that have been deleted from themselves to ensure
-that the iterator can't add those keys back:
+A dict consumes its iterator at initialization, and in the case of duplicates
+the last value wins:
 
-	>>> del d[20]
-	>>> del d[20]
-	KeyError: 20
-
-This is based on the Principal of Least Astonishment. When you delete a key
-from a regular dict, it doesn't come back. However, an IterDict's iterator may
-very well yield a key again later and we probably don't want that key
-re-injected into the dict. That would give strange and surprising results like:
-
-    >>> d = IterDict([(1,1), (2,2), (1,1)])
+    >>> d = dict([(1,1),(1,2)])
+    >>> d
+    {1: 2}
     >>> del d[1]
-    >>> d[2]
+    >>> d
+    {}
+
+IterDicts differ in that they stop consuming their iterators as soon as the
+first instance of a requested key is found:
+
+    >>> i = IterDict([(1,1), (1,2)])
+    >>> i
+    IterDict<{}, fed by <listiterator object at 0x105bab8d0>>
+    >>> i[1]
+    1
+    >>> i
+    IterDict<{1: 1}, fed by <listiterator object at 0x105bab8d0>>
+
+For space, time, and complexity reasons, IterDicts don't track keys that were
+present at one point and have been since deleted. This means that keys may
+reappear after deletion if the IterDict's iterator yields them again.
+Continuing the previous example:
+
+    >>> del i[1]
+    >>> i
+    IterDict<{}, fed by <listiterator object at 0x105bab890>>
+    >>> i[1]
     2
-    >>> d[1]
-    1  # <- Huh?
+    >>> i
+    IterDict<{1: 2}, fed by <listiterator object at 0x105bab890>>
+
