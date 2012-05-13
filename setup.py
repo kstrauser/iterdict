@@ -2,9 +2,14 @@
 
 from setuptools import setup, find_packages
 
+
+def read(fname):
+    import os
+    return open(os.path.join(os.path.dirname(__file__), fname)).read()
+
 setup(
     name="IterDict",
-    version="0.1.0",
+    version="0.2.0",
     author="Kirk Strauser",
     author_email="kirk@strauser.com",
     description=("Dict that lazily populates itself with items from the "
@@ -14,25 +19,8 @@ setup(
     url="http://packages.python.org/an_example_pypi_project",
     test_suite='iterdict.test.test_iterdict',
     packages=find_packages('src'),
-    package_dir = {'':'src'},
-    long_description="""\
-IterDicts are almost exactly like regular Python dicts, except that they're
-only populated upon demand. This gives them most of the same advantages of
-generators, such as the ability to operator on very large (or infinite!)
-datasets. For example:
-
-Accessing keys that aren't populated yet
-
->>> d = IterDict((a, a) for a in xrange(1000000000000000))  # 1 quadrillion (US)
->>> d[10]
-10
-
-Deleting keys that aren't populated yet
-
->>> del d[20]
->>> del d[20]
-KeyError: 20
-""",
+    package_dir={'': 'src'},
+    long_description=read('README.markdown'),
     classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
