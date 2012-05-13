@@ -158,9 +158,7 @@ class IterDict(dict):
 
     @_clonedictmethod
     def iterkeys(self):
-        for key in self.__iterkeys():
-            yield key
-        for key, value in self.__processiter():  # pylint: disable=W0612
+        for key, value in self.iteritems():
             yield key
 
     __iter__ = iterkeys
@@ -171,17 +169,18 @@ class IterDict(dict):
 
     @_clonedictmethod
     def itervalues(self):
-        for value in self.__itervalues():
-            yield value
-        for key, value in self.__processiter():  # pylint: disable=W0612
+        for key, value in self.iteritems():
             yield value
 
     @_clonedictmethod
     def iteritems(self):
         for item in self.__iteritems():
             yield item
-        for item in self.__processiter():
-            yield item
+        for key, value in self.__processiter():
+            if not self.__contains__(key):  # FIXME
+                yield (key, value)
+            else:
+                print 'Already yielded', key
 
     @_clonedictmethod
     def keys(self):
